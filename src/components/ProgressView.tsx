@@ -6,14 +6,11 @@
 import React, { useState, useEffect } from 'react';
 import {
   Flame,
-  Star,
   Sparkles,
   Award,
   CheckCircle2,
-  TrendingUp,
   RefreshCw,
   Trophy,
-  Zap,
 } from 'lucide-react';
 import { Task, BehaviorStat, Student } from '../types';
 import { narrateTrendWithGemini } from '../lib/gemini';
@@ -72,47 +69,48 @@ export const ProgressView: React.FC<ProgressViewProps> = ({
   }, [student.id, tasks.length]);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       {/* HERO LEVEL & TROPHY CARD */}
-      <div className="bg-gradient-to-br from-amber-400 via-orange-400 to-rose-400 rounded-3xl p-6 sm:p-7 text-white shadow-xl relative overflow-hidden">
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center text-4xl shadow-inner border border-white/30 animate-gentle-bounce">
+      <div className="bg-gradient-to-br from-amber-400 via-orange-400 to-rose-400 rounded-2xl sm:rounded-3xl p-4 sm:p-7 text-white shadow-lg relative overflow-hidden">
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center text-3xl sm:text-4xl shadow-inner border border-white/30 animate-gentle-bounce shrink-0">
               {student.avatar || '🚀'}
             </div>
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/25 text-white text-xs font-black uppercase tracking-wider mb-1">
-                <Trophy className="w-3.5 h-3.5 text-yellow-200" />
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/25 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider mb-1">
+                <Trophy className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-200 shrink-0" />
                 Level {level} Scholar
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold font-heading tracking-tight">
+              <h2 className="text-xl sm:text-3xl font-extrabold font-heading tracking-tight truncate">
                 {student.name}&apos;s Trophy Room 🏆
               </h2>
-              <p className="text-xs sm:text-sm text-white/90 font-medium">
+              <p className="text-[11px] sm:text-xs text-white/90 font-medium">
                 {totalStars} total learning stars collected!
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Counters row */}
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3 shrink-0">
             {/* Streak Counter */}
-            <div className="px-4 py-2.5 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 text-center">
-              <div className="flex items-center justify-center gap-1 text-yellow-200 text-lg font-black font-heading">
-                <Flame className="w-5 h-5 fill-yellow-300" />
+            <div className="px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 text-center">
+              <div className="flex items-center justify-center gap-1 text-yellow-200 text-base sm:text-lg font-black font-heading">
+                <Flame className="w-4 h-4 sm:w-5 sm:h-5 fill-yellow-300 shrink-0" />
                 {currentStreak}
               </div>
-              <div className="text-[10px] uppercase font-extrabold text-white/80 tracking-wider">
+              <div className="text-[9px] sm:text-[10px] uppercase font-extrabold text-white/80 tracking-wider">
                 Day Streak
               </div>
             </div>
 
             {/* Quests Done */}
-            <div className="px-4 py-2.5 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 text-center">
-              <div className="flex items-center justify-center gap-1 text-emerald-200 text-lg font-black font-heading">
-                <CheckCircle2 className="w-5 h-5" />
+            <div className="px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 text-center">
+              <div className="flex items-center justify-center gap-1 text-emerald-200 text-base sm:text-lg font-black font-heading">
+                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                 {completedTasks.length}
               </div>
-              <div className="text-[10px] uppercase font-extrabold text-white/80 tracking-wider">
+              <div className="text-[9px] sm:text-[10px] uppercase font-extrabold text-white/80 tracking-wider">
                 Quests Done
               </div>
             </div>
@@ -120,12 +118,12 @@ export const ProgressView: React.FC<ProgressViewProps> = ({
         </div>
 
         {/* Level Progress Bar */}
-        <div className="mt-5 pt-4 border-t border-white/20">
-          <div className="flex items-center justify-between text-xs font-bold mb-1.5">
+        <div className="mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-white/20">
+          <div className="flex items-center justify-between text-[11px] sm:text-xs font-bold mb-1">
             <span>Next Level ({starsInLevel} / 50 stars)</span>
             <span>Level {level + 1}</span>
           </div>
-          <div className="w-full h-3 rounded-full bg-black/20 p-0.5 overflow-hidden">
+          <div className="w-full h-2.5 sm:h-3 rounded-full bg-black/20 p-0.5 overflow-hidden">
             <div
               className="h-full rounded-full bg-gradient-to-r from-yellow-300 to-amber-200 transition-all duration-500 shadow-sm"
               style={{ width: `${levelProgress}%` }}
@@ -135,10 +133,10 @@ export const ProgressView: React.FC<ProgressViewProps> = ({
       </div>
 
       {/* AI STUDY BUDDY COACH */}
-      <div className="bg-white/85 backdrop-blur-sm rounded-3xl p-5 sm:p-6 border-2 border-amber-100 shadow-sm space-y-2">
+      <div className="bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-amber-100 shadow-2xs space-y-2">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-900 font-heading">
-            <Sparkles className="w-4 h-4 text-amber-500 animate-spin" />
+          <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-amber-900 font-heading">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-spin shrink-0" />
             <span>Study Buddy Insights ✨</span>
           </div>
           <button
@@ -146,12 +144,12 @@ export const ProgressView: React.FC<ProgressViewProps> = ({
             disabled={isLoadingTrend}
             className="text-xs text-slate-400 hover:text-amber-600 flex items-center gap-1 font-bold transition-colors"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoadingTrend ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3 h-3 ${isLoadingTrend ? 'animate-spin' : ''}`} />
             <span>Check again</span>
           </button>
         </div>
 
-        <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-sm sm:text-base font-bold text-amber-950">
+        <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-amber-50/70 border border-amber-200/80 text-xs sm:text-sm font-bold text-amber-950">
           {isLoadingTrend ? (
             <span className="text-slate-400 font-normal">Analyzing your awesome progress...</span>
           ) : (
@@ -161,34 +159,38 @@ export const ProgressView: React.FC<ProgressViewProps> = ({
       </div>
 
       {/* BADGES & SUPERPOWERS */}
-      <div className="bg-white/85 backdrop-blur-sm rounded-3xl p-5 sm:p-6 border-2 border-amber-100 shadow-sm space-y-4">
+      <div className="bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-amber-100 shadow-2xs space-y-3 sm:space-y-4">
         <div>
-          <h3 className="text-base sm:text-lg font-black text-slate-900 font-heading flex items-center gap-2">
-            <Award className="w-5 h-5 text-amber-500" />
-            Your Badges &amp; Achievements
+          <h3 className="text-base sm:text-lg font-black text-slate-900 font-heading flex items-center gap-1.5">
+            <Award className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
+            Badges &amp; Achievements
           </h3>
           <p className="text-xs text-slate-500">
             Keep completing homework and building study streaks to unlock all badges!
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-          {BADGES.map((badge) => {
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
+          {BADGES.map((badge, idx) => {
             const isUnlocked =
               (badge.minTasks && completedTasks.length >= badge.minTasks) ||
               (badge.minStreak && currentStreak >= badge.minStreak) ||
               (badge.minStars && totalStars >= badge.minStars);
 
+            const isLast = idx === BADGES.length - 1;
+
             return (
               <div
                 key={badge.id}
-                className={`p-3.5 rounded-2xl border-2 text-center transition-all ${
+                className={`p-3 rounded-xl sm:rounded-2xl border-2 text-center transition-all ${
+                  isLast ? 'col-span-2 sm:col-span-1' : ''
+                } ${
                   isUnlocked
-                    ? 'border-amber-300 bg-gradient-to-b from-amber-50 to-orange-50 shadow-sm'
+                    ? 'border-amber-300 bg-gradient-to-b from-amber-50 to-orange-50 shadow-2xs'
                     : 'border-slate-100 bg-slate-50/60 opacity-50 grayscale'
                 }`}
               >
-                <div className="text-3xl mb-1.5">{badge.emoji}</div>
+                <div className="text-2xl sm:text-3xl mb-1">{badge.emoji}</div>
                 <div className="text-xs font-black text-slate-800 font-heading truncate">
                   {badge.title}
                 </div>
@@ -203,7 +205,7 @@ export const ProgressView: React.FC<ProgressViewProps> = ({
 
       {/* SUBJECT MASTERY */}
       {stats.length > 0 && (
-        <div className="bg-white/85 backdrop-blur-sm rounded-3xl p-5 sm:p-6 border-2 border-amber-100 shadow-sm space-y-4">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-amber-100 shadow-2xs space-y-3">
           <div>
             <h3 className="text-base sm:text-lg font-black text-slate-900 font-heading">
               Subject Mastery
@@ -213,21 +215,21 @@ export const ProgressView: React.FC<ProgressViewProps> = ({
             </p>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5 sm:space-y-3">
             {stats.map((item) => (
               <div
                 key={item.subject}
-                className="p-3.5 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                className="p-3 rounded-xl sm:rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-black text-slate-800 font-heading">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs sm:text-sm font-black text-slate-800 font-heading">
                     {item.subject}
                   </span>
-                  <span className="text-xs font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-lg">
-                    {item.completion_rate_7d}% Complete
+                  <span className="text-[11px] sm:text-xs font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
+                    {item.completion_rate_7d}%
                   </span>
                 </div>
-                <div className="w-full h-2.5 rounded-full bg-slate-200 overflow-hidden">
+                <div className="w-full h-2 sm:h-2.5 rounded-full bg-slate-200 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-amber-400 to-emerald-400 transition-all duration-500"
                     style={{ width: `${Math.min(100, Math.max(8, item.completion_rate_7d))}%` }}

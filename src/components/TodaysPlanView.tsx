@@ -5,7 +5,6 @@
 
 import React, { useState } from 'react';
 import {
-  Mic,
   Plus,
   Volume2,
   VolumeX,
@@ -126,32 +125,32 @@ export const TodaysPlanView: React.FC<TodaysPlanViewProps> = ({
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       {/* Celebratory Banner on completion */}
       {celebrationMessage && (
-        <div className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 text-white font-extrabold text-sm sm:text-base flex items-center justify-between shadow-lg animate-star-pop">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-yellow-200 fill-yellow-200 animate-spin" />
-            <span>{celebrationMessage}</span>
+        <div className="p-3 sm:p-4 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 text-white font-extrabold text-xs sm:text-base flex items-center justify-between shadow-lg animate-star-pop">
+          <div className="flex items-center gap-2 min-w-0">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-200 fill-yellow-200 shrink-0" />
+            <span className="truncate">{celebrationMessage}</span>
           </div>
-          <Smile className="w-6 h-6 text-yellow-100 shrink-0" />
+          <Smile className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-100 shrink-0" />
         </div>
       )}
 
-      {/* Top Friendly Header & Study Time Slider */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-5 sm:p-6 border-2 border-amber-100 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b-2 border-slate-100">
+      {/* Top Friendly Header & Study Time Goal */}
+      <div className="bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-amber-100 shadow-2xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 sm:pb-4 border-b-2 border-slate-100">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1 text-xs font-black uppercase tracking-wider text-amber-900 bg-amber-100 px-3 py-1 rounded-full">
+              <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-black uppercase tracking-wider text-amber-900 bg-amber-100 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full">
                 🎯 Today&apos;s Quests
               </span>
-              <span className="inline-flex items-center gap-1 text-xs font-black px-3 py-1 rounded-full bg-orange-100 text-orange-900 border border-orange-200">
+              <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-black px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-orange-100 text-orange-900 border border-orange-200">
                 <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500" />
                 {currentStreak} Day Streak!
               </span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2 font-heading tracking-tight">
+            <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 mt-1.5 sm:mt-2 font-heading tracking-tight">
               Ready to Learn Today? 🌟
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
@@ -164,7 +163,7 @@ export const TodaysPlanView: React.FC<TodaysPlanViewProps> = ({
             <button
               id="read-plan-aloud-btn"
               onClick={handleReadAloud}
-              className={`self-start sm:self-center inline-flex items-center gap-2 px-3.5 py-2.5 rounded-2xl text-xs font-extrabold border-2 transition-all shadow-xs ${
+              className={`self-start sm:self-center inline-flex items-center gap-1.5 px-3 py-2 rounded-xl sm:rounded-2xl text-xs font-extrabold border-2 transition-all shadow-2xs shrink-0 ${
                 isReadingAloud
                   ? 'bg-amber-300 text-amber-950 border-amber-400 animate-pulse'
                   : 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200'
@@ -173,12 +172,12 @@ export const TodaysPlanView: React.FC<TodaysPlanViewProps> = ({
             >
               {isReadingAloud ? (
                 <>
-                  <VolumeX className="w-4 h-4 text-amber-800" />
+                  <VolumeX className="w-3.5 h-3.5 text-amber-800" />
                   <span>Stop Reading</span>
                 </>
               ) : (
                 <>
-                  <Volume2 className="w-4 h-4 text-amber-600" />
+                  <Volume2 className="w-3.5 h-3.5 text-amber-600" />
                   <span>Read to Me 📢</span>
                 </>
               )}
@@ -186,14 +185,14 @@ export const TodaysPlanView: React.FC<TodaysPlanViewProps> = ({
           )}
         </div>
 
-        {/* Study Time Available Selector (Fun quick buttons) */}
-        <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-50/50 p-3.5 rounded-2xl border border-amber-100">
+        {/* Study Time Available Selector */}
+        <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-amber-50/50 p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-amber-100">
           <div className="flex items-center gap-2">
-            <span className="text-lg">⏰</span>
+            <span className="text-base sm:text-lg">⏰</span>
             <span className="text-xs sm:text-sm font-bold text-slate-700">
-              Study Time Goal Today:
+              Study Time Goal:
             </span>
-            <span className="text-xs sm:text-sm font-black text-amber-900 bg-white px-2.5 py-1 rounded-xl border border-amber-200 shadow-2xs font-heading">
+            <span className="text-xs sm:text-sm font-black text-amber-900 bg-white px-2 py-0.5 rounded-lg border border-amber-200 font-heading">
               {availableMinutes} mins
             </span>
           </div>
@@ -203,9 +202,9 @@ export const TodaysPlanView: React.FC<TodaysPlanViewProps> = ({
               <button
                 key={mins}
                 onClick={() => setAvailableMinutes(mins)}
-                className={`text-xs px-3 py-1.5 rounded-xl border-2 font-black transition-all ${
+                className={`text-xs px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border-2 font-black transition-all shrink-0 ${
                   availableMinutes === mins
-                    ? 'bg-amber-500 text-white border-amber-500 shadow-sm scale-105'
+                    ? 'bg-amber-500 text-white border-amber-500 shadow-2xs scale-105'
                     : 'bg-white hover:bg-amber-50 text-slate-700 border-slate-200'
                 }`}
               >
@@ -217,60 +216,61 @@ export const TodaysPlanView: React.FC<TodaysPlanViewProps> = ({
       </div>
 
       {/* BIG PLAYFUL PRIMARY ACTION: Log Homework */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 sm:gap-3">
         <button
           id="primary-voice-log-btn"
           onClick={onOpenLogModal}
-          className="sm:col-span-3 py-4 px-5 rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-extrabold text-base sm:text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-xl active:scale-[0.98] transition-all"
+          className="sm:col-span-3 py-3.5 sm:py-4 px-4 sm:px-5 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-extrabold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-md hover:shadow-lg active:scale-[0.98] transition-all"
         >
-          <div className="w-9 h-9 rounded-2xl bg-white/25 flex items-center justify-center text-xl shadow-inner">
+          <div className="w-8 h-8 rounded-xl bg-white/25 flex items-center justify-center text-lg shadow-inner">
             🎤
           </div>
-          <span>Tell Me Your Homework (Voice or Text)</span>
+          <span className="sm:hidden">Tell Me Homework (Voice / Text)</span>
+          <span className="hidden sm:inline">Tell Me Your Homework (Voice or Text)</span>
         </button>
 
         <button
           id="secondary-typed-log-btn"
           onClick={onOpenLogModal}
-          className="sm:col-span-1 py-3.5 px-4 rounded-3xl bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-200 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all"
+          className="sm:col-span-1 py-3 px-3 rounded-2xl sm:rounded-3xl bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-200 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-2xs transition-all"
         >
           <Plus className="w-4 h-4 text-amber-600" />
-          <span>Type Homework</span>
+          <span>Type Task</span>
         </button>
       </div>
 
       {/* QUESTS LIST */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between px-2">
+      <div className="space-y-2.5 sm:space-y-3">
+        <div className="flex items-center justify-between px-1">
           <h3 className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-500 font-heading flex items-center gap-1.5">
-            <Zap className="w-4 h-4 text-amber-500" />
+            <Zap className="w-3.5 h-3.5 text-amber-500" />
             Quests to Complete
           </h3>
           {planItems.length > 0 && (
-            <span className="text-xs text-amber-800 font-bold bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-xl">
-              ~{totalEstimatedMinutes} mins total
+            <span className="text-[11px] sm:text-xs text-amber-800 font-bold bg-amber-50 border border-amber-200 px-2 sm:px-2.5 py-0.5 rounded-lg">
+              ~{totalEstimatedMinutes} mins
             </span>
           )}
         </div>
 
-        {/* Empty State when no tasks exist at all */}
+        {/* Empty State when no tasks exist */}
         {tasks.length === 0 ? (
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 sm:p-10 border-2 border-dashed border-amber-200 text-center space-y-4 shadow-sm">
-            <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-amber-200 to-orange-200 text-amber-900 mx-auto flex items-center justify-center text-3xl shadow-inner animate-gentle-bounce">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-10 border-2 border-dashed border-amber-200 text-center space-y-3 shadow-2xs">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-amber-200 to-orange-200 text-amber-900 mx-auto flex items-center justify-center text-2xl sm:text-3xl shadow-inner animate-gentle-bounce">
               📚
             </div>
             <div>
-              <h4 className="text-xl sm:text-2xl font-extrabold text-slate-900 font-heading">
+              <h4 className="text-lg sm:text-2xl font-extrabold text-slate-900 font-heading">
                 No Homework Quests Logged Yet!
               </h4>
               <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto mt-1">
-                Tap the big colorful microphone button above to tell Study Buddy what homework was assigned today!
+                Tap the big microphone button above to tell Study Buddy what homework was assigned today!
               </p>
             </div>
 
             <button
               onClick={onOpenLogModal}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-sm shadow-md transition-all active:scale-95"
+              className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95"
             >
               <Plus className="w-4 h-4" />
               <span>Add My First Assignment 🚀</span>
@@ -278,12 +278,12 @@ export const TodaysPlanView: React.FC<TodaysPlanViewProps> = ({
           </div>
         ) : planItems.length === 0 ? (
           /* All Scheduled Tasks Completed */
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 sm:p-10 border-2 border-emerald-200 text-center space-y-4 shadow-sm">
-            <div className="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center text-3xl shadow-inner animate-star-pop">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-10 border-2 border-emerald-200 text-center space-y-3 shadow-2xs">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center text-2xl sm:text-3xl shadow-inner animate-star-pop">
               🎉
             </div>
             <div>
-              <h4 className="text-xl sm:text-2xl font-extrabold text-slate-900 font-heading">
+              <h4 className="text-lg sm:text-2xl font-extrabold text-slate-900 font-heading">
                 All Quests Cleared for Today! 🏆
               </h4>
               <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto mt-1">
@@ -292,10 +292,10 @@ export const TodaysPlanView: React.FC<TodaysPlanViewProps> = ({
             </div>
             <button
               onClick={onOpenLogModal}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl sm:rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Got something new? Add task</span>
+              <span>Got something new? Add quest</span>
             </button>
           </div>
         ) : (
@@ -305,7 +305,7 @@ export const TodaysPlanView: React.FC<TodaysPlanViewProps> = ({
               <div
                 key={item.task.id}
                 id={`task-card-${item.task.id}`}
-                className={`bg-white rounded-3xl p-4 sm:p-5 border-2 transition-all shadow-xs hover:shadow-md ${
+                className={`bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 border-2 transition-all shadow-2xs hover:shadow-xs ${
                   isLate
                     ? 'border-rose-300 bg-rose-50/30'
                     : index === 0
@@ -313,47 +313,47 @@ export const TodaysPlanView: React.FC<TodaysPlanViewProps> = ({
                     : 'border-slate-100 hover:border-slate-200'
                 }`}
               >
-                <div className="flex items-start gap-3 sm:gap-4">
-                  {/* Big Friendly Checkbox */}
+                <div className="flex items-start gap-2.5 sm:gap-4">
+                  {/* Checkbox */}
                   <button
                     id={`toggle-task-${item.task.id}`}
                     onClick={() => handleTaskCheck(item.task.id, item.task.status)}
-                    className="mt-1 text-slate-300 hover:text-emerald-500 hover:scale-110 active:scale-95 transition-all shrink-0"
+                    className="mt-0.5 text-slate-300 hover:text-emerald-500 hover:scale-110 active:scale-95 transition-all shrink-0"
                     title="Mark finished and win stars!"
                   >
-                    <Circle className="w-7 h-7 sm:w-8 sm:h-8 hover:fill-emerald-50 stroke-[2.5]" />
+                    <Circle className="w-6 h-6 sm:w-7 sm:h-7 hover:fill-emerald-50 stroke-[2.5]" />
                   </button>
 
                   {/* Task Content */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap mb-1">
                       {/* Subject with emoji */}
-                      <span className="inline-flex items-center gap-1 text-xs font-extrabold px-2.5 py-1 rounded-xl bg-slate-100 text-slate-800 border border-slate-200">
+                      <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-extrabold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg sm:rounded-xl bg-slate-100 text-slate-800 border border-slate-200">
                         <span>{getSubjectEmoji(item.task.subject)}</span>
                         <span>{item.task.subject}</span>
                       </span>
 
                       {isLate ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-1 rounded-xl bg-rose-100 text-rose-800 border border-rose-200">
-                          <AlertTriangle className="w-3.5 h-3.5" /> Due Soon / Overdue!
+                        <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-lg bg-rose-100 text-rose-800 border border-rose-200">
+                          <AlertTriangle className="w-3 h-3" /> Due Soon!
                         </span>
                       ) : (
-                        <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1">
+                        <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 flex items-center gap-1">
                           <Calendar className="w-3 h-3 text-slate-400" />
                           Due: {item.task.due_date}
                         </span>
                       )}
 
-                      <span className="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-lg flex items-center gap-1 ml-auto">
+                      <span className="text-[10px] sm:text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-lg flex items-center gap-1">
                         <Clock className="w-3 h-3 text-amber-600" />
-                        {item.estimated_minutes} mins
+                        {item.estimated_minutes}m
                       </span>
 
                       {/* Delete button */}
                       {onDeleteTask && (
                         <button
                           onClick={() => onDeleteTask(item.task.id)}
-                          className="text-slate-300 hover:text-rose-500 p-1 rounded-lg transition-colors ml-1"
+                          className="text-slate-300 hover:text-rose-500 p-1 rounded-lg transition-colors ml-auto"
                           title="Delete quest"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -361,12 +361,12 @@ export const TodaysPlanView: React.FC<TodaysPlanViewProps> = ({
                       )}
                     </div>
 
-                    <div className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                    <div className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
                       {item.task.description}
                     </div>
 
-                    {/* Friendly Study Tip / Reason */}
-                    <div className="mt-2.5 flex items-start gap-2 p-2.5 rounded-2xl bg-amber-50/70 border border-amber-200/60 text-xs text-amber-950 font-medium">
+                    {/* Tip / Reason */}
+                    <div className="mt-2 flex items-start gap-1.5 p-2 rounded-xl bg-amber-50/70 border border-amber-200/60 text-[11px] sm:text-xs text-amber-950 font-medium">
                       <span className="font-extrabold text-amber-800 shrink-0">
                         💡 Tip:
                       </span>
@@ -380,7 +380,7 @@ export const TodaysPlanView: React.FC<TodaysPlanViewProps> = ({
         )}
 
         {unplannedCount > 0 && (
-          <div className="p-3.5 text-center text-xs font-semibold text-slate-500 bg-white/60 rounded-2xl border border-slate-200">
+          <div className="p-3 text-center text-xs font-semibold text-slate-500 bg-white/60 rounded-2xl border border-slate-200">
             +{unplannedCount} more upcoming task{unplannedCount > 1 ? 's' : ''} in queue. Slide study time above to tackle more!
           </div>
         )}
@@ -388,12 +388,12 @@ export const TodaysPlanView: React.FC<TodaysPlanViewProps> = ({
 
       {/* Completed Today Counter */}
       {completedTodayCount > 0 && (
-        <div className="flex items-center justify-between p-4 rounded-3xl bg-emerald-50 border-2 border-emerald-200 text-emerald-950 text-xs sm:text-sm font-extrabold shadow-xs">
-          <span className="flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+        <div className="flex items-center justify-between p-3 sm:p-4 rounded-2xl sm:rounded-3xl bg-emerald-50 border-2 border-emerald-200 text-emerald-950 text-xs sm:text-sm font-extrabold shadow-2xs">
+          <span className="flex items-center gap-1.5 sm:gap-2">
+            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
             Awesome! {completedTodayCount} quest{completedTodayCount > 1 ? 's' : ''} finished today!
           </span>
-          <span className="text-xs text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">
+          <span className="text-[11px] sm:text-xs text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
             🔥 Streak Active!
           </span>
         </div>

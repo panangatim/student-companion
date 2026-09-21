@@ -8,7 +8,6 @@ import {
   CalendarDays,
   Trophy,
   BookHeart,
-  PlusCircle,
   Plus,
 } from 'lucide-react';
 import { Student, Task, BehaviorStat, Reflection, TaskSource } from './types';
@@ -155,25 +154,26 @@ export default function App() {
       />
 
       {/* Main Content */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-4 sm:py-6 pb-28 sm:pb-12">
+      <main className="flex-1 max-w-4xl w-full mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-6 pb-28 sm:pb-12">
         {currentStudent ? (
           <>
             {/* Student Navigation Tabs */}
-            <div className="flex items-center justify-between bg-white/90 backdrop-blur-md rounded-3xl p-1.5 border-2 border-amber-100 shadow-sm mb-6">
+            <div className="flex items-center justify-between bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl p-1 sm:p-1.5 border-2 border-amber-100 shadow-2xs mb-4 sm:mb-6">
               <button
                 id="tab-plan-btn"
                 onClick={() => setActiveTab('plan')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl text-xs sm:text-sm font-extrabold font-heading transition-all ${
+                className={`flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2.5 sm:py-3 px-2 sm:px-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-extrabold font-heading transition-all ${
                   activeTab === 'plan'
-                    ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-md scale-[1.02]'
+                    ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-md scale-[1.01]'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-amber-50/50'
                 }`}
               >
-                <CalendarDays className="w-4 h-4" />
-                <span>Today&apos;s Quests</span>
+                <CalendarDays className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                <span className="sm:hidden">Quests</span>
+                <span className="hidden sm:inline">Today&apos;s Quests</span>
                 {pendingCount > 0 && (
                   <span
-                    className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                    className={`text-[10px] font-black px-1.5 sm:px-2 py-0.2 rounded-full shrink-0 ${
                       activeTab === 'plan'
                         ? 'bg-white text-orange-600'
                         : 'bg-amber-100 text-amber-900'
@@ -187,27 +187,29 @@ export default function App() {
               <button
                 id="tab-progress-btn"
                 onClick={() => setActiveTab('progress')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl text-xs sm:text-sm font-extrabold font-heading transition-all ${
+                className={`flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2.5 sm:py-3 px-2 sm:px-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-extrabold font-heading transition-all ${
                   activeTab === 'progress'
-                    ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-md scale-[1.02]'
+                    ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-md scale-[1.01]'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-amber-50/50'
                 }`}
               >
-                <Trophy className="w-4 h-4" />
-                <span>Trophies &amp; Stats</span>
+                <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                <span className="sm:hidden">Trophies</span>
+                <span className="hidden sm:inline">Trophies &amp; Stats</span>
               </button>
 
               <button
                 id="tab-reflection-btn"
                 onClick={() => setActiveTab('reflection')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl text-xs sm:text-sm font-extrabold font-heading transition-all ${
+                className={`flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2.5 sm:py-3 px-2 sm:px-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-extrabold font-heading transition-all ${
                   activeTab === 'reflection'
-                    ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-md scale-[1.02]'
+                    ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-md scale-[1.01]'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-amber-50/50'
                 }`}
               >
-                <BookHeart className="w-4 h-4" />
-                <span>Star Journal</span>
+                <BookHeart className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                <span className="sm:hidden">Journal</span>
+                <span className="hidden sm:inline">Star Journal</span>
               </button>
             </div>
 
@@ -243,17 +245,17 @@ export default function App() {
           </>
         ) : (
           /* Empty No-Student Greeting State */
-          <div className="bg-white/85 backdrop-blur-sm rounded-3xl p-10 border-2 border-dashed border-amber-200 text-center space-y-4 shadow-sm my-8">
-            <div className="text-5xl animate-gentle-bounce">🎒</div>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 font-heading">
+          <div className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 sm:p-10 border-2 border-dashed border-amber-200 text-center space-y-4 shadow-sm my-6 sm:my-8">
+            <div className="text-4xl sm:text-5xl animate-gentle-bounce">🎒</div>
+            <h2 className="text-xl sm:text-3xl font-black text-slate-900 font-heading">
               Ready to create your Study Buddy profile?
             </h2>
-            <p className="text-sm text-slate-600 max-w-md mx-auto">
+            <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">
               Pick your fun avatar and enter your name to start tracking homework quests and earning stars!
             </p>
             <button
               onClick={() => setIsOnboardingModalOpen(true)}
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold text-sm shadow-md hover:shadow-lg transition-all active:scale-95"
+              className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold text-sm shadow-md hover:shadow-lg transition-all active:scale-95"
             >
               <Plus className="w-5 h-5" />
               <span>Create My Profile 🚀</span>
@@ -264,11 +266,11 @@ export default function App() {
 
       {/* Floating Action Button for Mobile: Quick Log */}
       {currentStudent && (
-        <div className="fixed bottom-5 right-5 sm:hidden z-20">
+        <div className="fixed bottom-4 right-4 sm:hidden z-20">
           <button
             id="mobile-floating-log-btn"
             onClick={() => setIsLogModalOpen(true)}
-            className="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 text-white shadow-xl flex items-center justify-center active:scale-90 transition-transform border-2 border-white text-2xl"
+            className="w-13 h-13 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 text-white shadow-xl flex items-center justify-center active:scale-90 transition-transform border-2 border-white text-2xl"
             title="Log new homework quest"
           >
             🎤

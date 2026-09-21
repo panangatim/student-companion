@@ -9,13 +9,10 @@ import {
   Mic,
   MicOff,
   Sparkles,
-  Calendar,
   Clock,
-  BookOpen,
   Check,
   AlertCircle,
   Keyboard,
-  Smile,
 } from 'lucide-react';
 import { TaskSource } from '../types';
 import { extractTaskWithGemini } from '../lib/gemini';
@@ -45,9 +42,9 @@ const COMMON_SUBJECTS = [
 ];
 
 const PRESET_IDEAS = [
-  'Math worksheet Exercise 3.2',
-  'Read Chapter 4 and take notes',
-  'Science plant cell diagram',
+  'Math worksheet Ex 3.2',
+  'Read Chapter 4 of book',
+  'Science plant diagram',
   'History project map due Friday',
 ];
 
@@ -107,7 +104,7 @@ export const LogTaskModal: React.FC<LogTaskModalProps> = ({
     }
 
     const rec = createSpeechRecognizer(
-      (transcript, isFinal) => {
+      (transcript) => {
         setInputText(transcript);
         setDetectedSource('voice');
       },
@@ -168,25 +165,25 @@ export const LogTaskModal: React.FC<LogTaskModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border-4 border-amber-200 relative my-8 animate-star-pop max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div className="bg-white rounded-3xl max-w-lg w-full p-4 sm:p-7 shadow-2xl border-4 border-amber-200 relative my-auto animate-star-pop max-h-[90dvh] overflow-y-auto">
         {/* Close Button */}
         <button
           id="close-log-modal-btn"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100 transition-colors"
+          className="absolute top-3.5 right-3.5 p-2 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100 transition-colors"
           title="Close modal"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Modal Header */}
-        <div className="mb-5">
-          <div className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full bg-amber-100 text-amber-900 mb-2 font-heading">
+        <div className="mb-4 sm:mb-5">
+          <div className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-black px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 mb-1.5 font-heading">
             <Sparkles className="w-3.5 h-3.5 text-amber-600" />
             New Homework Quest
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 font-heading">
+          <h2 className="text-lg sm:text-2xl font-black text-slate-900 font-heading">
             What are you working on? 📝
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
@@ -195,48 +192,48 @@ export const LogTaskModal: React.FC<LogTaskModalProps> = ({
         </div>
 
         {!hasExtracted ? (
-          <div className="space-y-5">
-            {/* BIG SPEECH RECORDING HERO */}
-            <div className="p-6 rounded-3xl bg-gradient-to-b from-amber-50 to-orange-50/60 border-2 border-amber-200 text-center space-y-3 shadow-inner">
+          <div className="space-y-4 sm:space-y-5">
+            {/* SPEECH RECORDING HERO */}
+            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-amber-50 to-orange-50/60 border-2 border-amber-200 text-center space-y-2.5 shadow-inner">
               <button
                 id="voice-record-toggle-btn"
                 type="button"
                 onClick={toggleRecording}
-                className={`w-20 h-20 sm:w-22 sm:h-22 rounded-full mx-auto flex items-center justify-center transition-all shadow-lg active:scale-95 ${
+                className={`w-18 h-18 sm:w-22 sm:h-22 rounded-full mx-auto flex items-center justify-center transition-all shadow-lg active:scale-95 ${
                   isRecording
-                    ? 'bg-rose-500 text-white animate-pulse-ring scale-110 shadow-rose-300'
+                    ? 'bg-rose-500 text-white animate-pulse-ring scale-105 shadow-rose-300'
                     : 'bg-gradient-to-tr from-amber-500 to-orange-500 text-white hover:scale-105 shadow-amber-300'
                 }`}
               >
                 {isRecording ? (
-                  <MicOff className="w-10 h-10" />
+                  <MicOff className="w-8 h-8 sm:w-10 sm:h-10" />
                 ) : (
-                  <Mic className="w-10 h-10" />
+                  <Mic className="w-8 h-8 sm:w-10 sm:h-10" />
                 )}
               </button>
 
               <div>
-                <div className="text-sm font-extrabold text-slate-800 font-heading">
+                <div className="text-xs sm:text-sm font-extrabold text-slate-800 font-heading">
                   {isRecording ? 'Listening to you... Tap to Stop!' : 'Tap Microphone to Speak!'}
                 </div>
-                <div className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+                <div className="text-[11px] sm:text-xs text-slate-500 max-w-sm mx-auto mt-0.5">
                   Say something like: <em>&quot;Math homework exercise 4 due tomorrow&quot;</em>
                 </div>
               </div>
             </div>
 
             {speechError && (
-              <div className="p-3 rounded-2xl bg-amber-50 border-2 border-amber-200 text-amber-800 text-xs font-semibold flex items-center gap-2">
+              <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
                 <span>{speechError}</span>
               </div>
             )}
 
             {/* TYPED INPUT AREA */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-                <span className="flex items-center gap-1.5">
-                  <Keyboard className="w-4 h-4 text-slate-500" />
+                <span className="flex items-center gap-1">
+                  <Keyboard className="w-3.5 h-3.5 text-slate-500" />
                   Or write it out:
                 </span>
                 {inputText && (
@@ -251,23 +248,23 @@ export const LogTaskModal: React.FC<LogTaskModalProps> = ({
 
               <textarea
                 id="task-text-input"
-                rows={3}
+                rows={2}
                 placeholder="e.g. Science friction questions 1 to 5 due Friday"
                 value={inputText}
                 onChange={(e) => {
                   setInputText(e.target.value);
                   setDetectedSource('typed');
                 }}
-                className="w-full p-3.5 text-sm font-semibold rounded-2xl border-2 border-slate-200 focus:border-amber-400 focus:ring-4 focus:ring-amber-200/50 focus:outline-none transition-all"
+                className="w-full p-3 text-sm font-semibold rounded-xl sm:rounded-2xl border-2 border-slate-200 focus:border-amber-400 focus:ring-4 focus:ring-amber-200/50 focus:outline-none transition-all"
               />
             </div>
 
             {/* Quick Preset Ideas */}
             <div>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                Quick ideas (tap to insert):
+              <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                Quick ideas:
               </span>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1">
                 {PRESET_IDEAS.map((idea) => (
                   <button
                     key={idea}
@@ -276,7 +273,7 @@ export const LogTaskModal: React.FC<LogTaskModalProps> = ({
                       setInputText(idea);
                       setDetectedSource('typed');
                     }}
-                    className="text-xs px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-100 text-slate-700 font-semibold border border-slate-200 transition-colors"
+                    className="text-xs px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-amber-100 text-slate-700 font-semibold border border-slate-200 transition-colors truncate max-w-full"
                   >
                     {idea}
                   </button>
@@ -284,32 +281,32 @@ export const LogTaskModal: React.FC<LogTaskModalProps> = ({
               </div>
             </div>
 
-            {/* Next / Extract Button */}
+            {/* Next Button */}
             <button
               id="extract-task-btn"
               type="button"
               disabled={!inputText.trim() || isExtracting}
               onClick={handleExtractTask}
-              className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 disabled:opacity-40 text-white font-extrabold text-base shadow-md transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 sm:py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 disabled:opacity-40 text-white font-extrabold text-sm sm:text-base shadow-md transition-all flex items-center justify-center gap-2"
             >
               {isExtracting ? (
                 <>
-                  <Sparkles className="w-5 h-5 animate-spin" />
+                  <Sparkles className="w-4 h-4 animate-spin" />
                   <span>Organizing your assignment...</span>
                 </>
               ) : (
                 <>
                   <span>Next: Check Quest Details</span>
-                  <Check className="w-5 h-5" />
+                  <Check className="w-4 h-4" />
                 </>
               )}
             </button>
           </div>
         ) : (
-          /* STEP 2: Kid-Friendly Quest Confirmation */
-          <div className="space-y-4">
-            <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-900 flex items-center justify-between">
-              <span>✨ Everything looks good! Review and tweak if needed:</span>
+          /* STEP 2: Quest Confirmation */
+          <div className="space-y-3.5 sm:space-y-4">
+            <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-900 flex items-center justify-between">
+              <span>✨ Review details:</span>
               <button
                 onClick={() => setHasExtracted(false)}
                 className="text-amber-700 underline text-xs font-bold hover:text-amber-900"
@@ -320,7 +317,7 @@ export const LogTaskModal: React.FC<LogTaskModalProps> = ({
 
             {/* Subject Selector */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
                 Subject:
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
@@ -329,7 +326,7 @@ export const LogTaskModal: React.FC<LogTaskModalProps> = ({
                     key={sub.name}
                     type="button"
                     onClick={() => setConfirmedSubject(sub.name)}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all ${
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
                       confirmedSubject === sub.name
                         ? 'border-amber-400 bg-amber-50 text-amber-950 shadow-2xs'
                         : 'border-slate-100 hover:border-slate-200 text-slate-700 bg-slate-50/60'
@@ -344,24 +341,24 @@ export const LogTaskModal: React.FC<LogTaskModalProps> = ({
 
             {/* Task Description */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                What do you need to do?
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-0.5">
+                Assignment details:
               </label>
               <input
                 id="confirmed-description-input"
                 type="text"
                 value={confirmedDescription}
                 onChange={(e) => setConfirmedDescription(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-sm font-bold rounded-xl border-2 border-slate-200 focus:border-amber-400 focus:outline-none"
+                className="w-full px-3 py-2 text-sm font-bold rounded-xl border-2 border-slate-200 focus:border-amber-400 focus:outline-none"
               />
             </div>
 
-            {/* Due Date Buttons */}
+            {/* Due Date */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                When is it due?
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                Due date:
               </label>
-              <div className="flex flex-wrap gap-1.5 mb-2">
+              <div className="flex flex-wrap gap-1 mb-1.5">
                 {[
                   { label: 'Today ⚡', val: getRelativeDateStr(0) },
                   { label: 'Tomorrow 🌅', val: getRelativeDateStr(1) },
@@ -372,7 +369,7 @@ export const LogTaskModal: React.FC<LogTaskModalProps> = ({
                     key={item.label}
                     type="button"
                     onClick={() => setConfirmedDueDate(item.val)}
-                    className={`text-xs px-3 py-1.5 rounded-xl font-extrabold border-2 transition-all ${
+                    className={`text-xs px-2.5 py-1 rounded-xl font-extrabold border-2 transition-all ${
                       confirmedDueDate === item.val
                         ? 'bg-amber-400 text-amber-950 border-amber-400 shadow-2xs'
                         : 'bg-slate-100 text-slate-700 border-slate-100 hover:bg-slate-200'
@@ -386,22 +383,22 @@ export const LogTaskModal: React.FC<LogTaskModalProps> = ({
                 type="date"
                 value={confirmedDueDate}
                 onChange={(e) => setConfirmedDueDate(e.target.value)}
-                className="w-full px-3 py-2 text-xs font-bold rounded-xl border border-slate-200 focus:outline-none focus:border-amber-400"
+                className="w-full px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 focus:outline-none focus:border-amber-400"
               />
             </div>
 
             {/* Estimated Minutes */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                Estimated study time:
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                Estimated minutes:
               </label>
-              <div className="flex items-center gap-2">
+              <div className="grid grid-cols-5 gap-1.5">
                 {[15, 20, 30, 45, 60].map((mins) => (
                   <button
                     key={mins}
                     type="button"
                     onClick={() => setConfirmedMinutes(mins)}
-                    className={`flex-1 py-1.5 rounded-xl text-xs font-black border-2 transition-all ${
+                    className={`py-1.5 rounded-xl text-xs font-black border-2 transition-all ${
                       confirmedMinutes === mins
                         ? 'bg-amber-500 text-white border-amber-500 shadow-2xs'
                         : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
@@ -414,11 +411,11 @@ export const LogTaskModal: React.FC<LogTaskModalProps> = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-3 flex items-center gap-2.5">
+            <div className="pt-2 flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setHasExtracted(false)}
-                className="py-3 px-4 rounded-2xl border-2 border-slate-200 hover:bg-slate-100 font-bold text-slate-600 text-xs transition-colors"
+                className="py-2.5 px-3.5 rounded-2xl border-2 border-slate-200 hover:bg-slate-100 font-bold text-slate-600 text-xs transition-colors"
               >
                 Back
               </button>
@@ -426,7 +423,7 @@ export const LogTaskModal: React.FC<LogTaskModalProps> = ({
                 id="save-task-btn"
                 type="button"
                 onClick={handleSave}
-                className="flex-1 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-extrabold text-sm shadow-md transition-all flex items-center justify-center gap-2 active:scale-95"
+                className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-extrabold text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-1.5 active:scale-95"
               >
                 <Check className="w-4 h-4" />
                 <span>Add to My Quests! 🚀</span>
