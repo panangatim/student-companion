@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@layer base {
+  h1, h2, h3, .font-heading {
+    font-family: 'Fredoka', 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+}
+
+/* Kid-friendly bubbly animations */
+@keyframes star-pop {
+  0% { transform: scale(0.8) rotate(-10deg); }
+  50% { transform: scale(1.25) rotate(10deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes gentle-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 0.3; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.animate-star-pop {
+  animation: star-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.animate-gentle-bounce {
+  animation: gentle-bounce 2s ease-in-out infinite;
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Custom scrollbars for friendly UI */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

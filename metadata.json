@@ -1,0 +1,6 @@
+{
+  "name": "Progress Compass",
+  "description": "Behavioral progress-tracking and adaptive-planning companion for school students at Edify School Tirupati.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
