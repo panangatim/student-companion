@@ -5,78 +5,116 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  CalendarDays,
+  LayoutDashboard,
+  BookOpen,
+  BookCheck,
+  Calendar,
+  Award,
   Trophy,
-  BookHeart,
+  BrainCircuit,
+  MoreHorizontal,
   Plus,
+  Play,
+  Shield,
+  Layers,
+  Target,
+  FileText,
+  X,
 } from 'lucide-react';
-import { Student, Task, BehaviorStat, Reflection, TaskSource } from './types';
+import {
+  Student,
+  Task,
+  BehaviorStat,
+  Reflection,
+  TaskSource,
+  Exam,
+  StudySession,
+  Goal,
+  Habit,
+} from './types';
 import { PilotDataStore, migrateLegacyPlaintextPins } from './lib/supabase';
-import { Header } from './components/Header';
-import { TodaysPlanView } from './components/TodaysPlanView';
-import { ProgressView } from './components/ProgressView';
-import { WeeklyReflectionView } from './components/WeeklyReflectionView';
+import { Header, PrimaryTab } from './components/Header';
+import { HomeDashboard } from './components/HomeDashboard';
+import { DiaryView } from './components/DiaryView';
+import { HomeworkView } from './components/HomeworkView';
+import { LearningCalendarView } from './components/LearningCalendarView';
+import { ExamCenterView } from './components/ExamCenterView';
+import { ProgressDashboardView } from './components/ProgressDashboardView';
+import { AiBuddyView } from './components/AiBuddyView';
+import { WeeklyReviewView } from './components/WeeklyReviewView';
+import { StudySessionModal } from './components/StudySessionModal';
+import { MonthlyReportModal } from './components/MonthlyReportModal';
+import { ParentViewModal } from './components/ParentViewModal';
+import { SubjectsModal } from './components/SubjectsModal';
+import { GoalsHabitsModal } from './components/GoalsHabitsModal';
 import { LogTaskModal } from './components/LogTaskModal';
 import { LoginModal } from './components/LoginModal';
 import { OnboardingModal } from './components/OnboardingModal';
-
-type ActiveTab = 'plan' | 'progress' | 'reflection';
 
 export default function App() {
   const [currentStudent, setCurrentStudent] = useState<Student | null>(
     PilotDataStore.getCurrentStudent()
   );
-  const [activeTab, setActiveTab] = useState<ActiveTab>('plan');
+  const [activeTab, setActiveTab] = useState<PrimaryTab>('home');
+  const [buddyInitialPrompt, setBuddyInitialPrompt] = useState<string>('');
 
   // Modals
   const [isLogModalOpen, setIsLogModalOpen] = useState<boolean>(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
-  const [isOnboardingModalOpen, setIsOnboardingModalOpen] = useState<boolean>(
-    !PilotDataStore.getCurrentStudent()
-  );
+  const [isOnboardingModalOpen, setIsOnboardingModalOpen] = useState<boolean>(false);
+  const [isStudyModalOpen, setIsStudyModalOpen] = useState<boolean>(false);
+  const [isMonthlyReportOpen, setIsMonthlyReportOpen] = useState<boolean>(false);
+  const [isParentViewOpen, setIsParentViewOpen] = useState<boolean>(false);
+  const [isSubjectsModalOpen, setIsSubjectsModalOpen] = useState<boolean>(false);
+  const [isGoalsModalOpen, setIsGoalsModalOpen] = useState<boolean>(false);
+  const [isMobileMoreOpen, setIsMobileMoreOpen] = useState<boolean>(false);
+  const [isWeeklyReviewOpen, setIsWeeklyReviewOpen] = useState<boolean>(false);
+
+  // Study Session prefill state
+  const [studySessionSubject, setStudySessionSubject] = useState('Science');
+  const [studySessionTopic, setStudySessionTopic] = useState('Concept Revision');
 
   // Student State
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [studySessions, setStudySessions] = useState<StudySession[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [habits, setHabits] = useState<Habit[]>([]);
   const [stats, setStats] = useState<BehaviorStat[]>([]);
-  const [reflections, setReflections] = useState<Reflection[]>([]);
 
-  // Load student data (instant local load + background cloud sync)
+  // Load student data
   const refreshData = async () => {
-    const student = PilotDataStore.getCurrentStudent();
+    let student = PilotDataStore.getCurrentStudent();
+    if (!student) {
+      const students = PilotDataStore.getStudents();
+      student = students[0] || null;
+    }
     setCurrentStudent(student);
 
     if (student) {
       setTasks(PilotDataStore.getTasks(student.id));
+      setExams(PilotDataStore.getExams(student.id));
+      setStudySessions(PilotDataStore.getStudySessions(student.id));
+      setGoals(PilotDataStore.getGoals(student.id));
+      setHabits(PilotDataStore.getHabits(student.id));
       setStats(PilotDataStore.computeBehaviorStats(student.id));
-      setReflections(PilotDataStore.getReflections(student.id));
 
       // Asynchronously sync from Supabase cloud if connected
       const cloudTasks = await PilotDataStore.fetchTasksFromCloud(student.id);
-      const cloudRefs = await PilotDataStore.fetchReflectionsFromCloud(student.id);
       setTasks(cloudTasks);
       setStats(PilotDataStore.computeBehaviorStats(student.id));
-      setReflections(cloudRefs);
-    } else {
-      // Check cloud for existing students
-      const cloudStudents = await PilotDataStore.fetchStudentsFromCloud();
-      if (cloudStudents.length > 0) {
-        PilotDataStore.setCurrentStudent(cloudStudents[0]);
-        setCurrentStudent(cloudStudents[0]);
-      } else {
-        setTasks([]);
-        setStats([]);
-        setReflections([]);
-        setIsOnboardingModalOpen(true);
-      }
     }
   };
 
   useEffect(() => {
     migrateLegacyPlaintextPins();
+    refreshData();
   }, []);
 
   useEffect(() => {
-    refreshData();
+    if (currentStudent) {
+      refreshData();
+    }
   }, [currentStudent?.id]);
 
   // Task actions
@@ -92,6 +130,7 @@ export default function App() {
     PilotDataStore.addTask({
       student_id: currentStudent.id,
       subject: taskData.subject,
+      title: taskData.description,
       description: taskData.description,
       assigned_date: new Date().toISOString().split('T')[0],
       due_date: taskData.due_date,
@@ -99,13 +138,17 @@ export default function App() {
       completed_at: null,
       source: taskData.source,
       estimated_minutes: taskData.estimated_minutes,
+      priority: 'normal',
+      entry_type: 'homework',
     });
 
     refreshData();
   };
 
-  const handleToggleTaskStatus = (taskId: string, currentStatus: string) => {
-    const nextStatus = currentStatus === 'done' ? 'pending' : 'done';
+  const handleToggleTaskStatus = (taskId: string) => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) return;
+    const nextStatus = task.status === 'done' ? 'pending' : 'done';
     PilotDataStore.updateTaskStatus(taskId, nextStatus);
     refreshData();
   };
@@ -115,197 +158,399 @@ export default function App() {
     refreshData();
   };
 
-  const handleAddReflection = (refData: {
-    student_id: string;
-    week_start: string;
-    prompt_answered: string;
-    response_text: string;
-    mood?: string;
-    source: TaskSource;
-  }) => {
-    PilotDataStore.addReflection(refData);
+  // Exam actions
+  const handleAddExam = (exam: Omit<Exam, 'id' | 'created_at'>) => {
+    PilotDataStore.addExam(exam);
     refreshData();
   };
 
-  const handleStudentSwitch = (newStudent: Student) => {
-    setCurrentStudent(newStudent);
-  };
-
-  const handleOnboardingComplete = (newStudent: Student) => {
-    setCurrentStudent(newStudent);
-    setIsOnboardingModalOpen(false);
+  const handleUpdateExam = (exam: Exam) => {
+    PilotDataStore.updateExam(exam);
     refreshData();
   };
 
-  // Compute highest streak from stats
+  const handleDeleteExam = (examId: string) => {
+    PilotDataStore.deleteExam(examId);
+    refreshData();
+  };
+
+  // Study session actions
+  const handleStartStudySession = (subject: string, topic: string) => {
+    setStudySessionSubject(subject);
+    setStudySessionTopic(topic);
+    setIsStudyModalOpen(true);
+  };
+
+  const handleSaveStudySession = (session: Omit<StudySession, 'id' | 'completed_at'>) => {
+    if (!currentStudent) return;
+    PilotDataStore.logStudySession({
+      ...session,
+      student_id: currentStudent.id,
+    });
+    refreshData();
+  };
+
+  // Goals & Habits actions
+  const handleToggleGoal = (goalId: string) => {
+    PilotDataStore.toggleGoal(goalId);
+    refreshData();
+  };
+
+  const handleToggleHabit = (habitId: string) => {
+    PilotDataStore.toggleHabit(habitId);
+    refreshData();
+  };
+
+  // Ask Buddy quick prompt
+  const handleAskBuddyPrompt = (promptText: string) => {
+    setBuddyInitialPrompt(promptText);
+    setActiveTab('buddy');
+  };
+
+  // Current streak
   const currentStreak =
-    stats.length > 0 && stats[0].current_streak !== undefined
-      ? stats[0].current_streak
-      : 0;
-
-  const pendingCount = tasks.filter(
-    (t) => t.status === 'pending' || t.status === 'late'
-  ).length;
+    stats.length > 0 && stats[0].current_streak !== undefined ? stats[0].current_streak : 5;
 
   return (
-    <div className="min-h-screen flex flex-col antialiased selection:bg-amber-200">
-      {/* Top Friendly Header */}
+    <div className="min-h-screen flex flex-col bg-slate-50/60 antialiased selection:bg-indigo-100 font-sans">
+      {/* Top Header */}
       <Header
         currentStudent={currentStudent}
         currentStreak={currentStreak}
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
         onOpenSwitchProfile={() => setIsProfileModalOpen(true)}
         onOpenNewProfile={() => setIsOnboardingModalOpen(true)}
+        onOpenParentView={() => setIsParentViewOpen(true)}
+        onOpenSubjects={() => setIsSubjectsModalOpen(true)}
+        onOpenGoals={() => setIsGoalsModalOpen(true)}
       />
 
-      {/* Main Content */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-6 pb-32 sm:pb-16">
+      {/* Main Container */}
+      <main className="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-5 py-4 sm:py-6 pb-28 lg:pb-12">
         {currentStudent ? (
           <>
-            {/* Student Navigation Tabs */}
-            <div className="flex items-center justify-between bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl p-1 sm:p-1.5 border-2 border-amber-100 shadow-2xs mb-4 sm:mb-6">
-              <button
-                id="tab-plan-btn"
-                onClick={() => setActiveTab('plan')}
-                className={`flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2.5 sm:py-3 px-2 sm:px-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-extrabold font-heading transition-all ${
-                  activeTab === 'plan'
-                    ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-md scale-[1.01]'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-amber-50/50'
-                }`}
-              >
-                <CalendarDays className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                <span className="sm:hidden">Quests</span>
-                <span className="hidden sm:inline">Today&apos;s Quests</span>
-                {pendingCount > 0 && (
-                  <span
-                    className={`text-[10px] font-black px-1.5 sm:px-2 py-0.2 rounded-full shrink-0 ${
-                      activeTab === 'plan'
-                        ? 'bg-white text-orange-600'
-                        : 'bg-amber-100 text-amber-900'
-                    }`}
-                  >
-                    {pendingCount}
-                  </span>
-                )}
-              </button>
-
-              <button
-                id="tab-progress-btn"
-                onClick={() => setActiveTab('progress')}
-                className={`flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2.5 sm:py-3 px-2 sm:px-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-extrabold font-heading transition-all ${
-                  activeTab === 'progress'
-                    ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-md scale-[1.01]'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-amber-50/50'
-                }`}
-              >
-                <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                <span className="sm:hidden">Trophies</span>
-                <span className="hidden sm:inline">Trophies &amp; Stats</span>
-              </button>
-
-              <button
-                id="tab-reflection-btn"
-                onClick={() => setActiveTab('reflection')}
-                className={`flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2.5 sm:py-3 px-2 sm:px-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-extrabold font-heading transition-all ${
-                  activeTab === 'reflection'
-                    ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-md scale-[1.01]'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-amber-50/50'
-                }`}
-              >
-                <BookHeart className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                <span className="sm:hidden">Journal</span>
-                <span className="hidden sm:inline">Star Journal</span>
-              </button>
-            </div>
-
-            {/* Tab Views */}
-            {activeTab === 'plan' && (
-              <TodaysPlanView
-                tasks={tasks}
-                stats={stats}
-                currentStreak={currentStreak}
-                onOpenLogModal={() => setIsLogModalOpen(true)}
-                onToggleTaskStatus={handleToggleTaskStatus}
-                onDeleteTask={handleDeleteTask}
-              />
-            )}
-
-            {activeTab === 'progress' && (
-              <ProgressView
+            {isWeeklyReviewOpen ? (
+              <WeeklyReviewView
                 student={currentStudent}
                 tasks={tasks}
-                stats={stats}
-                currentStreak={currentStreak}
+                exams={exams}
+                studySessions={studySessions}
+                onBack={() => setIsWeeklyReviewOpen(false)}
+                onStartStudySession={handleStartStudySession}
               />
-            )}
+            ) : (
+              <>
+                {activeTab === 'home' && (
+                  <HomeDashboard
+                    student={currentStudent}
+                    tasks={tasks}
+                    exams={exams}
+                    studySessions={studySessions}
+                    currentStreak={currentStreak}
+                    onToggleTask={handleToggleTaskStatus}
+                    onOpenLogModal={() => setIsLogModalOpen(true)}
+                    onStartStudySession={handleStartStudySession}
+                    onNavigateTab={(tab: any) => setActiveTab(tab)}
+                    onAskBuddyPrompt={handleAskBuddyPrompt}
+                  />
+                )}
 
-            {activeTab === 'reflection' && (
-              <WeeklyReflectionView
-                studentId={currentStudent.id}
-                reflections={reflections}
-                stats={stats}
-                onAddReflection={handleAddReflection}
-              />
+                {activeTab === 'diary' && (
+                  <DiaryView
+                    studentId={currentStudent.id}
+                    tasks={tasks}
+                    onAddTask={(t) => {
+                      PilotDataStore.addTask(t);
+                      refreshData();
+                    }}
+                    onDeleteTask={handleDeleteTask}
+                    onToggleStatus={handleToggleTaskStatus}
+                  />
+                )}
+
+                {activeTab === 'homework' && (
+                  <HomeworkView
+                    tasks={tasks}
+                    onToggleStatus={handleToggleTaskStatus}
+                    onDeleteTask={handleDeleteTask}
+                    onOpenLogModal={() => setIsLogModalOpen(true)}
+                  />
+                )}
+
+                {activeTab === 'calendar' && (
+                  <LearningCalendarView
+                    tasks={tasks}
+                    exams={exams}
+                    studySessions={studySessions}
+                    onToggleTask={handleToggleTaskStatus}
+                  />
+                )}
+
+                {activeTab === 'exams' && (
+                  <ExamCenterView
+                    studentId={currentStudent.id}
+                    exams={exams}
+                    onAddExam={handleAddExam}
+                    onUpdateExam={handleUpdateExam}
+                    onDeleteExam={handleDeleteExam}
+                    onStartStudySession={handleStartStudySession}
+                  />
+                )}
+
+                {activeTab === 'progress' && (
+                  <ProgressDashboardView
+                    student={currentStudent}
+                    tasks={tasks}
+                    exams={exams}
+                    studySessions={studySessions}
+                    stats={stats}
+                    currentStreak={currentStreak}
+                    onOpenMonthlyReport={() => setIsMonthlyReportOpen(true)}
+                    onOpenWeeklyReview={() => setIsWeeklyReviewOpen(true)}
+                  />
+                )}
+
+                {activeTab === 'buddy' && (
+                  <AiBuddyView
+                    student={currentStudent}
+                    tasks={tasks}
+                    exams={exams}
+                    initialPrompt={buddyInitialPrompt}
+                    onStartStudySession={handleStartStudySession}
+                  />
+                )}
+              </>
             )}
           </>
         ) : (
-          /* Empty No-Student Greeting State */
-          <div className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 sm:p-10 border-2 border-dashed border-amber-200 text-center space-y-4 shadow-sm my-6 sm:my-8">
-            <div className="text-4xl sm:text-5xl animate-gentle-bounce">🎒</div>
-            <h2 className="text-xl sm:text-3xl font-black text-slate-900 font-heading">
-              Ready to create your Study Buddy profile?
+          <div className="bg-white rounded-3xl p-8 text-center border-2 border-dashed border-indigo-200 space-y-4 my-8">
+            <div className="text-4xl">🎒</div>
+            <h2 className="text-2xl font-black text-slate-900 font-heading">
+              Welcome to Study Buddy!
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">
-              Pick your fun avatar and enter your name to start tracking homework quests and earning stars!
+            <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
+              Set up your student profile to start tracking your daily school quests and learning progress.
             </p>
             <button
               onClick={() => setIsOnboardingModalOpen(true)}
-              className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold text-sm shadow-md hover:shadow-lg transition-all active:scale-95"
+              className="px-5 py-3 rounded-2xl bg-indigo-600 text-white font-extrabold text-sm shadow-md hover:bg-indigo-700 transition-all"
             >
-              <Plus className="w-5 h-5" />
-              <span>Create My Profile 🚀</span>
+              Create My Profile 🚀
             </button>
           </div>
         )}
       </main>
 
-      {/* Floating Action Button for Mobile: Quick Log (Shown strictly on daily quest plan tab) */}
-      {currentStudent && activeTab === 'plan' && (
-        <div className="fixed bottom-4 right-4 sm:hidden z-20">
+      {/* Mobile Bottom Navigation Bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-1.5 shadow-lg">
+        <div className="flex items-center justify-around">
+          {[
+            { key: 'home', label: 'Home', icon: LayoutDashboard },
+            { key: 'diary', label: 'Diary', icon: BookOpen },
+            { key: 'homework', label: 'Tasks', icon: BookCheck },
+            { key: 'calendar', label: 'Calendar', icon: Calendar },
+            { key: 'buddy', label: 'Buddy 🤖', icon: BrainCircuit },
+          ].map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.key && !isMobileMoreOpen;
+            return (
+              <button
+                key={item.key}
+                onClick={() => {
+                  setIsMobileMoreOpen(false);
+                  setIsWeeklyReviewOpen(false);
+                  setActiveTab(item.key as PrimaryTab);
+                }}
+                className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all font-heading min-w-[50px] ${
+                  isActive ? 'text-indigo-600 font-black' : 'text-slate-400 font-bold'
+                }`}
+              >
+                <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
+                <span className="text-[10px]">{item.label}</span>
+              </button>
+            );
+          })}
+
+          {/* More Sheet Trigger on Mobile */}
           <button
-            id="mobile-floating-log-btn"
-            onClick={() => setIsLogModalOpen(true)}
-            className="w-13 h-13 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 text-white shadow-xl flex items-center justify-center active:scale-90 transition-transform border-2 border-white text-2xl"
-            title="Log new homework quest"
+            onClick={() => setIsMobileMoreOpen(true)}
+            className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all font-heading min-w-[50px] ${
+              isMobileMoreOpen ? 'text-indigo-600 font-black' : 'text-slate-400 font-bold'
+            }`}
           >
-            🎤
+            <MoreHorizontal className="w-5 h-5" />
+            <span className="text-[10px]">More</span>
           </button>
+        </div>
+      </div>
+
+      {/* Mobile "More" Drawer Modal */}
+      {isMobileMoreOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-6 shadow-2xl border-4 border-indigo-200 relative my-auto animate-star-pop space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-lg font-black text-slate-900 font-heading">More Features</h3>
+              <button
+                onClick={() => setIsMobileMoreOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5">
+              <button
+                onClick={() => {
+                  setIsMobileMoreOpen(false);
+                  setActiveTab('exams');
+                }}
+                className="p-3.5 rounded-2xl bg-purple-50 text-purple-900 text-left font-black text-xs space-y-1 hover:bg-purple-100"
+              >
+                <Award className="w-5 h-5 text-purple-600" />
+                <span className="block font-heading">Exam Center 🎯</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsMobileMoreOpen(false);
+                  setActiveTab('progress');
+                }}
+                className="p-3.5 rounded-2xl bg-emerald-50 text-emerald-900 text-left font-black text-xs space-y-1 hover:bg-emerald-100"
+              >
+                <Trophy className="w-5 h-5 text-emerald-600" />
+                <span className="block font-heading">My Progress 🏆</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsMobileMoreOpen(false);
+                  setIsStudyModalOpen(true);
+                }}
+                className="p-3.5 rounded-2xl bg-blue-50 text-blue-900 text-left font-black text-xs space-y-1 hover:bg-blue-100"
+              >
+                <Play className="w-5 h-5 text-blue-600" />
+                <span className="block font-heading">Study Timer ⏱</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsMobileMoreOpen(false);
+                  setIsGoalsModalOpen(true);
+                }}
+                className="p-3.5 rounded-2xl bg-amber-50 text-amber-900 text-left font-black text-xs space-y-1 hover:bg-amber-100"
+              >
+                <Target className="w-5 h-5 text-amber-600" />
+                <span className="block font-heading">Goals &amp; Habits 🔥</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsMobileMoreOpen(false);
+                  setIsSubjectsModalOpen(true);
+                }}
+                className="p-3.5 rounded-2xl bg-indigo-50 text-indigo-900 text-left font-black text-xs space-y-1 hover:bg-indigo-100"
+              >
+                <Layers className="w-5 h-5 text-indigo-600" />
+                <span className="block font-heading">My Subjects 📚</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsMobileMoreOpen(false);
+                  setIsParentViewOpen(true);
+                }}
+                className="p-3.5 rounded-2xl bg-slate-100 text-slate-900 text-left font-black text-xs space-y-1 hover:bg-slate-200"
+              >
+                <Shield className="w-5 h-5 text-slate-600" />
+                <span className="block font-heading">Parent View 🛡</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Modals */}
+      {/* Modals & Dialogs */}
       {currentStudent && (
-        <LogTaskModal
-          isOpen={isLogModalOpen}
-          onClose={() => setIsLogModalOpen(false)}
-          onSaveTask={handleSaveNewTask}
-          studentId={currentStudent.id}
-        />
+        <>
+          <StudySessionModal
+            isOpen={isStudyModalOpen}
+            onClose={() => setIsStudyModalOpen(false)}
+            initialSubject={studySessionSubject}
+            initialTopic={studySessionTopic}
+            onSaveSession={handleSaveStudySession}
+          />
+
+          <MonthlyReportModal
+            isOpen={isMonthlyReportOpen}
+            onClose={() => setIsMonthlyReportOpen(false)}
+            student={currentStudent}
+            tasks={tasks}
+            exams={exams}
+            studySessions={studySessions}
+            currentStreak={currentStreak}
+          />
+
+          <ParentViewModal
+            isOpen={isParentViewOpen}
+            onClose={() => setIsParentViewOpen(false)}
+            student={currentStudent}
+            tasks={tasks}
+            exams={exams}
+            studySessions={studySessions}
+            currentStreak={currentStreak}
+          />
+
+          <SubjectsModal
+            isOpen={isSubjectsModalOpen}
+            onClose={() => setIsSubjectsModalOpen(false)}
+            tasks={tasks}
+            exams={exams}
+            studySessions={studySessions}
+            onStartStudySession={handleStartStudySession}
+          />
+
+          <GoalsHabitsModal
+            isOpen={isGoalsModalOpen}
+            onClose={() => setIsGoalsModalOpen(false)}
+            goals={goals}
+            habits={habits}
+            onToggleGoal={handleToggleGoal}
+            onToggleHabit={handleToggleHabit}
+          />
+
+          <LogTaskModal
+            isOpen={isLogModalOpen}
+            onClose={() => setIsLogModalOpen(false)}
+            onSaveTask={handleSaveNewTask}
+            studentId={currentStudent.id}
+          />
+        </>
       )}
 
       <LoginModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
-        onSelectStudent={handleStudentSwitch}
+        onSelectStudent={(s) => {
+          setCurrentStudent(s);
+          setIsProfileModalOpen(false);
+        }}
         currentStudentId={currentStudent?.id}
-        onOpenCreateNew={() => setIsOnboardingModalOpen(true)}
-        onStudentDeleted={refreshData}
+        onOpenCreateNew={() => {
+          setIsProfileModalOpen(false);
+          setIsOnboardingModalOpen(true);
+        }}
       />
 
       <OnboardingModal
         isOpen={isOnboardingModalOpen}
-        onComplete={handleOnboardingComplete}
         canCancel={Boolean(currentStudent)}
         onClose={() => setIsOnboardingModalOpen(false)}
+        onComplete={(newStudent) => {
+          setCurrentStudent(newStudent);
+          setIsOnboardingModalOpen(false);
+          refreshData();
+        }}
       />
     </div>
   );

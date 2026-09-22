@@ -4,7 +4,17 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Student, Task, BehaviorStat, Reflection, CohortAggregateStats } from '../types';
+import {
+  Student,
+  Task,
+  BehaviorStat,
+  Reflection,
+  CohortAggregateStats,
+  Exam,
+  StudySession,
+  Goal,
+  Habit,
+} from '../types';
 
 // Detect environment variables for Supabase Cloud
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
@@ -27,9 +37,13 @@ export const supabase: SupabaseClient | null = isSupabaseConfigured
 // ============================================================================
 
 export const STORAGE_STUDENTS_KEY = 'study_buddy_students_v2';
-const STORAGE_TASKS_KEY = 'study_buddy_tasks_v2';
-const STORAGE_REFLECTIONS_KEY = 'study_buddy_reflections_v2';
-const STORAGE_CURRENT_STUDENT_KEY = 'study_buddy_active_student_v2';
+export const STORAGE_TASKS_KEY = 'study_buddy_tasks_v2';
+export const STORAGE_REFLECTIONS_KEY = 'study_buddy_reflections_v2';
+export const STORAGE_CURRENT_STUDENT_KEY = 'study_buddy_active_student_v2';
+export const STORAGE_EXAMS_KEY = 'study_buddy_exams_v2';
+export const STORAGE_STUDY_SESSIONS_KEY = 'study_buddy_study_sessions_v2';
+export const STORAGE_GOALS_KEY = 'study_buddy_goals_v2';
+export const STORAGE_HABITS_KEY = 'study_buddy_habits_v2';
 
 /**
  * Hashes a 4-digit PIN string using SHA-256 via Web Crypto API
@@ -89,12 +103,296 @@ export class PilotDataStore {
       const data = localStorage.getItem(STORAGE_STUDENTS_KEY);
       if (data) {
         const parsed = JSON.parse(data);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {
       console.error('Failed to load students:', e);
     }
-    return [];
+
+    // Default Companion Student: Deeksha Panangati (ID / PIN: 2015)
+    const deekshaStudent: Student = {
+      id: 'student_deeksha_2015',
+      name: 'Deeksha Panangati',
+      username: 'deeksha',
+      pin: '2015', // Automatically migrated to SHA-256 by migrateLegacyPlaintextPins
+      class: 'Grade 6',
+      school: 'Edify School',
+      avatar: '🚀',
+      favorite_subject: 'Science',
+      stars: 45,
+      created_at: new Date().toISOString(),
+    };
+    this.saveStudents([deekshaStudent]);
+    this.setCurrentStudent(deekshaStudent);
+    this.seedDeekshaInitialData('student_deeksha_2015');
+    return [deekshaStudent];
+  }
+
+  public static seedDeekshaInitialData(studentId: string) {
+    const existingTasks = this.getTasks(studentId);
+    if (existingTasks.length > 0) return;
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    const friday = new Date(today);
+    friday.setDate(today.getDate() + 3);
+    const fridayStr = friday.toISOString().split('T')[0];
+
+    const nextMonday = new Date(today);
+    nextMonday.setDate(today.getDate() + 6);
+    const nextMondayStr = nextMonday.toISOString().split('T')[0];
+
+    const initialTasks: Task[] = [
+      {
+        id: 'task_1',
+        student_id: studentId,
+        subject: 'Mathematics',
+        title: 'Maths Exercise 5.2',
+        description: 'Maths exercise 5.2: Fractions & Decimals (Q1 - 10)',
+        assigned_date: todayStr,
+        due_date: todayStr,
+        status: 'pending',
+        priority: 'high',
+        difficulty: 'medium',
+        estimated_minutes: 30,
+        source: 'typed',
+        entry_type: 'homework',
+        teacher_name: 'Mrs. Sharma',
+      },
+      {
+        id: 'task_2',
+        student_id: studentId,
+        subject: 'Science',
+        title: 'Read Science Chapter 4',
+        description: 'Read Chapter 4: Plant Respiration and write key definitions',
+        assigned_date: todayStr,
+        due_date: todayStr,
+        status: 'pending',
+        priority: 'normal',
+        difficulty: 'easy',
+        estimated_minutes: 25,
+        source: 'voice',
+        entry_type: 'homework',
+        teacher_name: 'Dr. Rao',
+      },
+      {
+        id: 'task_3',
+        student_id: studentId,
+        subject: 'English',
+        title: 'English Creative Story',
+        description: 'Write a 250-word story about space exploration',
+        assigned_date: todayStr,
+        due_date: tomorrowStr,
+        status: 'pending',
+        priority: 'normal',
+        difficulty: 'medium',
+        estimated_minutes: 35,
+        source: 'typed',
+        entry_type: 'homework',
+        teacher_name: 'Ms. Elizabeth',
+      },
+      {
+        id: 'task_4',
+        student_id: studentId,
+        subject: 'Mathematics',
+        title: '20-Minute Maths Speed Test',
+        description: 'Practice 10 mental multiplication problems',
+        assigned_date: todayStr,
+        due_date: todayStr,
+        status: 'done',
+        completed_at: todayStr,
+        priority: 'normal',
+        difficulty: 'easy',
+        estimated_minutes: 20,
+        source: 'typed',
+        entry_type: 'study',
+      },
+      {
+        id: 'task_5',
+        student_id: studentId,
+        subject: 'General',
+        title: 'Pack School Bag & Geometry Box',
+        description: 'Organize notebooks and sharpen pencils for tomorrow',
+        assigned_date: todayStr,
+        due_date: todayStr,
+        status: 'done',
+        completed_at: todayStr,
+        priority: 'low',
+        difficulty: 'easy',
+        estimated_minutes: 10,
+        source: 'typed',
+        entry_type: 'classwork',
+      },
+      {
+        id: 'task_6',
+        student_id: studentId,
+        subject: 'Computer Science',
+        title: 'Python Graphics Lab Assignment',
+        description: 'Code a colorful spiral pattern in Python',
+        assigned_date: todayStr,
+        due_date: nextMondayStr,
+        status: 'pending',
+        priority: 'normal',
+        difficulty: 'medium',
+        estimated_minutes: 40,
+        source: 'typed',
+        entry_type: 'project',
+      },
+    ];
+    this.setStoredTasks(initialTasks);
+
+    // Initial Exams
+    const initialExams: Exam[] = [
+      {
+        id: 'exam_1',
+        student_id: studentId,
+        title: 'Science Mid-Term Exam',
+        subject: 'Science',
+        exam_date: fridayStr,
+        chapters: [
+          { id: 'ch_4', name: 'Chapter 4: Plant Respiration', status: 'completed' },
+          { id: 'ch_5', name: 'Chapter 5: Photosynthesis & Chloroplasts', status: 'needs_revision' },
+          { id: 'ch_6', name: 'Chapter 6: Cell Organelles & Functions', status: 'not_started' },
+        ],
+        revision_notes: 'Focus heavily on the light vs dark cycle diagram for Chapter 5.',
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: 'exam_2',
+        student_id: studentId,
+        title: 'Maths Unit Assessment',
+        subject: 'Mathematics',
+        exam_date: nextMondayStr,
+        chapters: [
+          { id: 'mch_1', name: 'Fractions & Mixed Numbers', status: 'completed' },
+          { id: 'mch_2', name: 'Decimals & Percentages', status: 'needs_revision' },
+        ],
+        created_at: new Date().toISOString(),
+      },
+    ];
+    localStorage.setItem(STORAGE_EXAMS_KEY, JSON.stringify(initialExams));
+
+    // Initial Habits
+    const initialHabits: Habit[] = [
+      {
+        id: 'hab_1',
+        student_id: studentId,
+        title: 'Read 20 minutes daily',
+        emoji: '📖',
+        current_streak: 5,
+        completed_today: true,
+        last_completed_date: todayStr,
+      },
+      {
+        id: 'hab_2',
+        student_id: studentId,
+        title: 'Complete homework before 7 PM',
+        emoji: '✏️',
+        current_streak: 6,
+        completed_today: false,
+      },
+      {
+        id: 'hab_3',
+        student_id: studentId,
+        title: 'Practice 10 Maths questions',
+        emoji: '🧠',
+        current_streak: 4,
+        completed_today: true,
+        last_completed_date: todayStr,
+      },
+      {
+        id: 'hab_4',
+        student_id: studentId,
+        title: 'Pack school bag night before',
+        emoji: '🎒',
+        current_streak: 7,
+        completed_today: true,
+        last_completed_date: todayStr,
+      },
+      {
+        id: 'hab_5',
+        student_id: studentId,
+        title: 'Drink water during study',
+        emoji: '💧',
+        current_streak: 3,
+        completed_today: false,
+      },
+    ];
+    localStorage.setItem(STORAGE_HABITS_KEY, JSON.stringify(initialHabits));
+
+    // Initial Goals
+    const initialGoals: Goal[] = [
+      {
+        id: 'goal_1',
+        student_id: studentId,
+        title: 'Complete all homework on time',
+        category: 'daily',
+        target_value: 5,
+        current_value: 3,
+        unit: 'tasks',
+        completed: false,
+      },
+      {
+        id: 'goal_2',
+        student_id: studentId,
+        title: 'Study 4 hours this week',
+        category: 'weekly',
+        target_value: 240,
+        current_value: 220,
+        unit: 'mins',
+        completed: false,
+      },
+      {
+        id: 'goal_3',
+        student_id: studentId,
+        title: 'Master Science Chapters 4 to 6',
+        category: 'monthly',
+        target_value: 3,
+        current_value: 1,
+        unit: 'chapters',
+        completed: false,
+      },
+    ];
+    localStorage.setItem(STORAGE_GOALS_KEY, JSON.stringify(initialGoals));
+
+    // Initial Study Sessions
+    const initialSessions: StudySession[] = [
+      {
+        id: 'sess_1',
+        student_id: studentId,
+        subject: 'Science',
+        topic: 'Plant Respiration Review',
+        duration_minutes: 25,
+        completed_at: todayStr,
+        mood_rating: 'good',
+        notes: 'Understood stomata and gas exchange easily.',
+      },
+      {
+        id: 'sess_2',
+        student_id: studentId,
+        subject: 'Mathematics',
+        topic: 'Fractions Problem Solving',
+        duration_minutes: 30,
+        completed_at: todayStr,
+        mood_rating: 'easy',
+        notes: 'Practiced 8 textbook questions correctly.',
+      },
+      {
+        id: 'sess_3',
+        student_id: studentId,
+        subject: 'English',
+        topic: 'Grammar: Active vs Passive Voice',
+        duration_minutes: 20,
+        completed_at: todayStr,
+        mood_rating: 'good',
+      },
+    ];
+    localStorage.setItem(STORAGE_STUDY_SESSIONS_KEY, JSON.stringify(initialSessions));
   }
 
   public static async fetchStudentsFromCloud(): Promise<Student[]> {
@@ -573,11 +871,168 @@ export class PilotDataStore {
     };
   }
 
+  // --- Exams Management ---
+  public static getExams(studentId: string): Exam[] {
+    try {
+      const data = localStorage.getItem(STORAGE_EXAMS_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) return parsed.filter((e: Exam) => e.student_id === studentId);
+      }
+    } catch (e) {
+      console.error('Failed to load exams:', e);
+    }
+    return [];
+  }
+
+  public static addExam(exam: Omit<Exam, 'id' | 'created_at'>): Exam {
+    const exams = this.getAllExams();
+    const newExam: Exam = {
+      ...exam,
+      id: 'exam_' + Math.random().toString(36).substring(2, 10),
+      created_at: new Date().toISOString(),
+    };
+    exams.push(newExam);
+    localStorage.setItem(STORAGE_EXAMS_KEY, JSON.stringify(exams));
+    return newExam;
+  }
+
+  public static updateExam(updated: Exam): void {
+    const exams = this.getAllExams().map((e) => (e.id === updated.id ? updated : e));
+    localStorage.setItem(STORAGE_EXAMS_KEY, JSON.stringify(exams));
+  }
+
+  public static deleteExam(examId: string): void {
+    const exams = this.getAllExams().filter((e) => e.id !== examId);
+    localStorage.setItem(STORAGE_EXAMS_KEY, JSON.stringify(exams));
+  }
+
+  private static getAllExams(): Exam[] {
+    try {
+      const data = localStorage.getItem(STORAGE_EXAMS_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  // --- Study Sessions Management ---
+  public static getStudySessions(studentId: string): StudySession[] {
+    try {
+      const data = localStorage.getItem(STORAGE_STUDY_SESSIONS_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) return parsed.filter((s: StudySession) => s.student_id === studentId);
+      }
+    } catch (e) {
+      console.error('Failed to load study sessions:', e);
+    }
+    return [];
+  }
+
+  public static logStudySession(session: Omit<StudySession, 'id' | 'completed_at'>): StudySession {
+    const all = this.getAllStudySessions();
+    const newSession: StudySession = {
+      ...session,
+      id: 'sess_' + Math.random().toString(36).substring(2, 10),
+      completed_at: new Date().toISOString(),
+    };
+    all.unshift(newSession);
+    localStorage.setItem(STORAGE_STUDY_SESSIONS_KEY, JSON.stringify(all));
+    // Reward stars for focused study session!
+    const starsEarned = Math.max(5, Math.round(session.duration_minutes / 2));
+    this.addStars(session.student_id, starsEarned);
+    return newSession;
+  }
+
+  private static getAllStudySessions(): StudySession[] {
+    try {
+      const data = localStorage.getItem(STORAGE_STUDY_SESSIONS_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  // --- Goals Management ---
+  public static getGoals(studentId: string): Goal[] {
+    try {
+      const data = localStorage.getItem(STORAGE_GOALS_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) return parsed.filter((g: Goal) => g.student_id === studentId);
+      }
+    } catch (e) {
+      console.error('Failed to load goals:', e);
+    }
+    return [];
+  }
+
+  public static toggleGoal(goalId: string): void {
+    const all = this.getAllGoals().map((g) =>
+      g.id === goalId ? { ...g, completed: !g.completed } : g
+    );
+    localStorage.setItem(STORAGE_GOALS_KEY, JSON.stringify(all));
+  }
+
+  private static getAllGoals(): Goal[] {
+    try {
+      const data = localStorage.getItem(STORAGE_GOALS_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  // --- Habits Management ---
+  public static getHabits(studentId: string): Habit[] {
+    try {
+      const data = localStorage.getItem(STORAGE_HABITS_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) return parsed.filter((h: Habit) => h.student_id === studentId);
+      }
+    } catch (e) {
+      console.error('Failed to load habits:', e);
+    }
+    return [];
+  }
+
+  public static toggleHabit(habitId: string): void {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const all = this.getAllHabits().map((h) => {
+      if (h.id === habitId) {
+        const nextCompleted = !h.completed_today;
+        return {
+          ...h,
+          completed_today: nextCompleted,
+          current_streak: nextCompleted ? h.current_streak + 1 : Math.max(0, h.current_streak - 1),
+          last_completed_date: nextCompleted ? todayStr : h.last_completed_date,
+        };
+      }
+      return h;
+    });
+    localStorage.setItem(STORAGE_HABITS_KEY, JSON.stringify(all));
+  }
+
+  private static getAllHabits(): Habit[] {
+    try {
+      const data = localStorage.getItem(STORAGE_HABITS_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  }
+
   // Reset/Clear local data
   public static resetAllData() {
     localStorage.removeItem(STORAGE_STUDENTS_KEY);
     localStorage.removeItem(STORAGE_TASKS_KEY);
     localStorage.removeItem(STORAGE_REFLECTIONS_KEY);
     localStorage.removeItem(STORAGE_CURRENT_STUDENT_KEY);
+    localStorage.removeItem(STORAGE_EXAMS_KEY);
+    localStorage.removeItem(STORAGE_STUDY_SESSIONS_KEY);
+    localStorage.removeItem(STORAGE_GOALS_KEY);
+    localStorage.removeItem(STORAGE_HABITS_KEY);
   }
 }

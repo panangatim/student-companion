@@ -133,6 +133,11 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
+    // Health check
+    if (url.pathname === '/api/health') {
+      return jsonResponse({ status: 'ok', time: new Date().toISOString() });
+    }
+
     // 1. /api/parse-task
     if (url.pathname === '/api/parse-task' && request.method === 'POST') {
       try {
@@ -256,6 +261,128 @@ export default {
 
         const sentence = heuristicTrendNarration(stats);
         return jsonResponse({ sentence, source: 'heuristic_fallback' });
+      } catch (err) {
+        return jsonResponse({ error: 'Internal server error' }, 500);
+      }
+    }
+
+    // 3. /api/buddy-chat
+    if (url.pathname === '/api/buddy-chat' && request.method === 'POST') {
+      try {
+        const body: any = await request.json().catch(() => ({}));
+        const message = body.message || '';
+        const studentName = body.studentName || 'Deeksha';
+        const tasks = body.tasks || [];
+        const exams = body.exams || [];
+
+        const pending = tasks.filter((t: any) => t.status !== 'done');
+        const nextExam = exams[0];
+
+        const apiKey = env.GEMINI_API_KEY;
+        if (apiKey) {
+          try {
+            const contextText = `Student: ${studentName}. Pending tasks: ${pending.map((t: any) => `${t.subject}: ${t.description} (due ${t.due_date})`).join('; ')}. Upcoming exams: ${exams.map((e: any) => `${e.title} on ${e.exam_date}`).join('; ')}.`;
+            const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            const geminiRes = await fetch(geminiUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [
+                  {
+                    parts: [
+                      {
+                        text: `You are Buddy, an encouraging, friendly AI Digital School Companion for student ${studentName}. Keep replies short (2-3 sentences max), warm, and actionable.\n${contextText}\nStudent says: "${message}"`,
+                      },
+                    ],
+                  },
+                ],
+              }),
+            });
+
+            if (geminiRes.ok) {
+              const data: any = await geminiRes.json();
+              const candidate = data.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (candidate) {
+                return jsonResponse({ reply: candidate.trim(), source: 'gemini' });
+              }
+            }
+          } catch (e) {
+            console.warn('Gemini chat failed, using heuristic:', e);
+          }
+        }
+
+        // Heuristic fallback
+        const lower = message.toLowerCase();
+        let reply = `I'm here to help, ${studentName}! What would you like to conquer today? 🚀`;
+
+        if (lower.includes('what should i study') || lower.includes('what next')) {
+          if (nextExam) {
+            reply = `Your ${nextExam.title} is coming up on ${nextExam.exam_date}! I recommend a 20-minute focused revision session on ${nextExam.subject} today. 💡`;
+          } else if (pending.length > 0) {
+            reply = `You have ${pending.length} tasks on your planner today! Starting with ${pending[0].subject} (${pending[0].title || pending[0].description}) will give you quick momentum. 🎯`;
+          } else {
+            reply = `You're all caught up on homework quests! Fantastic job! Would you like to read for 20 minutes or review an upcoming topic? 🌟`;
+          }
+        } else if (lower.includes('photosynthesis')) {
+          reply = `Photosynthesis is how green plants turn sunlight, water, and carbon dioxide into glucose (energy) and release oxygen! 🌿 Think of leaves like nature's solar powered kitchens. Want me to quiz you on this?`;
+        } else if (lower.includes('fraction')) {
+          reply = `A fraction is just a part of a whole! The top number (numerator) tells how many slices you have, and the bottom (denominator) tells how many equal slices the whole pizza was cut into! 🍕`;
+        } else if (lower.includes('quiz')) {
+          reply = `Pop quiz time! 🧠 Question: In plant photosynthesis, which green pigment captures sunlight inside the leaf? (Hint: starts with 'C'!)`;
+        } else if (lower.includes('pending') || lower.includes('homework')) {
+          reply = pending.length > 0
+            ? `You have ${pending.length} pending homework quest${pending.length > 1 ? 's' : ''}: ${pending.slice(0, 3).map((t: any) => t.subject).join(', ')}. Let's check them off one by one!`
+            : `All homework quests are complete! You are a star learner today! ⭐`;
+        }
+
+        return jsonResponse({ reply, source: 'heuristic_fallback' });
+      } catch (err) {
+        return jsonResponse({ error: 'Internal server error' }, 500);
+      }
+    }
+
+    // 4. /api/ai-tutor
+    if (url.pathname === '/api/ai-tutor' && request.method === 'POST') {
+      try {
+        const body: any = await request.json().catch(() => ({}));
+        const topic = body.topic || 'Photosynthesis';
+        const step = body.step || 1; // 1: Understand, 2: Example, 3: Practice, 4: Check, 5: Improve
+        const studentAnswer = body.studentAnswer || '';
+
+        const apiKey = env.GEMINI_API_KEY;
+        if (apiKey) {
+          try {
+            const prompt = `You are Buddy in AI Tutor Mode for a Grade 6 student.\nTopic: ${topic}\nCurrent Step: ${step} (1=Understand, 2=Example, 3=Practice question, 4=Check answer "${studentAnswer}", 5=Improve/Encourage).\nProvide a clear, engaging, child-friendly response appropriate for Step ${step}. Keep it under 60 words.`;
+            const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            const geminiRes = await fetch(geminiUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+              }),
+            });
+            if (geminiRes.ok) {
+              const data: any = await geminiRes.json();
+              const candidate = data.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (candidate) {
+                return jsonResponse({ text: candidate.trim(), source: 'gemini' });
+              }
+            }
+          } catch (e) {
+            console.warn('Gemini tutor error:', e);
+          }
+        }
+
+        // Heuristic step responses
+        const tutorSteps: Record<number, string> = {
+          1: `Let's understand ${topic}! Plants use light energy from the sun to convert water and carbon dioxide into food (glucose) and give off clean oxygen for us to breathe! 🌿`,
+          2: `Imagine baking bread: you need flour (CO2) and water, plus oven heat (sunlight). The leaf chloroplast is the oven that bakes glucose cookies for the plant! 🍪`,
+          3: `Practice time! ✏️ Which gas do plants absorb from the air during photosynthesis, and which gas do they release?`,
+          4: `Great attempt! Plants take in Carbon Dioxide (CO2) through tiny openings called stomata and release fresh Oxygen (O2) as a byproduct! 🌟`,
+          5: `Awesome job learning ${topic}! You now know the core process of plant energy. Ready to try another concept or take a quick quiz? 🚀`,
+        };
+
+        return jsonResponse({ text: tutorSteps[step] || tutorSteps[1], source: 'heuristic_fallback' });
       } catch (err) {
         return jsonResponse({ error: 'Internal server error' }, 500);
       }
