@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { X, UserPlus, CheckCircle2, Lock, Trash2, Users } from 'lucide-react';
 import { Student } from '../types';
-import { PilotDataStore } from '../lib/supabase';
+import { PilotDataStore, verifyPin, hashPin } from '../lib/supabase';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -45,11 +45,19 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     onClose();
   };
 
-  const handleVerifyPin = (e: React.FormEvent) => {
+  const handleVerifyPin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pinPromptStudent) return;
 
-    if (enteredPin === pinPromptStudent.pin) {
+    const isValid = await verifyPin(enteredPin, pinPromptStudent.pin);
+
+    if (isValid) {
+      // If student profile still had legacy unhashed plaintext PIN, auto-migrate to SHA-256
+      if (pinPromptStudent.pin && pinPromptStudent.pin === enteredPin.trim()) {
+        const hashed = await hashPin(enteredPin.trim());
+        const upgraded = { ...pinPromptStudent, pin: hashed };
+        PilotDataStore.updateStudent(upgraded);
+      }
       PilotDataStore.setCurrentStudent(pinPromptStudent);
       onSelectStudent(pinPromptStudent);
       setPinPromptStudent(null);
@@ -70,8 +78,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-4 border-amber-200 relative my-8 animate-star-pop">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 py-6 sm:py-10 overflow-y-auto">
+      <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-4 border-amber-200 relative my-auto animate-star-pop">
         <button
           id="close-login-modal-btn"
           onClick={onClose}

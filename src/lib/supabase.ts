@@ -26,10 +26,61 @@ export const supabase: SupabaseClient | null = isSupabaseConfigured
 // REAL STUDENT DATA STORE (Persistent Local Storage + Live Supabase Cloud Sync)
 // ============================================================================
 
-const STORAGE_STUDENTS_KEY = 'study_buddy_students_v2';
+export const STORAGE_STUDENTS_KEY = 'study_buddy_students_v2';
 const STORAGE_TASKS_KEY = 'study_buddy_tasks_v2';
 const STORAGE_REFLECTIONS_KEY = 'study_buddy_reflections_v2';
 const STORAGE_CURRENT_STUDENT_KEY = 'study_buddy_active_student_v2';
+
+/**
+ * Hashes a 4-digit PIN string using SHA-256 via Web Crypto API
+ */
+export async function hashPin(pin: string): Promise<string> {
+  if (!pin || pin.trim() === '') return '';
+  const trimmed = pin.trim();
+  const encoder = new TextEncoder();
+  const data = encoder.encode(trimmed);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Verifies entered PIN against stored hash with backward compatibility for legacy plaintext PINs
+ */
+export async function verifyPin(enteredPin: string, storedPinOrHash?: string): Promise<boolean> {
+  if (!storedPinOrHash || storedPinOrHash.trim() === '') return true;
+  const trimmedEntered = enteredPin.trim();
+  // Backward compatibility: match plaintext directly if not yet upgraded
+  if (trimmedEntered === storedPinOrHash) return true;
+  const hash = await hashPin(trimmedEntered);
+  return hash === storedPinOrHash;
+}
+
+/**
+ * Migrates any legacy plaintext PINs stored in localStorage to SHA-256 hashes
+ */
+export async function migrateLegacyPlaintextPins(): Promise<void> {
+  try {
+    const students = PilotDataStore.getStudents();
+    let hasMigration = false;
+    const updated = await Promise.all(
+      students.map(async (s) => {
+        // Plaintext PINs are typically 4 digits (< 32 chars), whereas SHA-256 hex is 64 chars
+        if (s.pin && s.pin.length > 0 && s.pin.length < 32) {
+          hasMigration = true;
+          return { ...s, pin: await hashPin(s.pin) };
+        }
+        return s;
+      })
+    );
+    if (hasMigration) {
+      PilotDataStore.saveStudents(updated);
+      console.log('Successfully upgraded legacy student PINs to SHA-256 hashes.');
+    }
+  } catch (e) {
+    console.warn('Migration of legacy PINs skipped:', e);
+  }
+}
 
 export class PilotDataStore {
   // --- Students Management ---
@@ -65,7 +116,7 @@ export class PilotDataStore {
     return this.getStudents();
   }
 
-  private static saveStudents(students: Student[]) {
+  public static saveStudents(students: Student[]) {
     try {
       localStorage.setItem(STORAGE_STUDENTS_KEY, JSON.stringify(students));
     } catch (e) {

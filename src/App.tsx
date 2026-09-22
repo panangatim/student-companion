@@ -11,7 +11,7 @@ import {
   Plus,
 } from 'lucide-react';
 import { Student, Task, BehaviorStat, Reflection, TaskSource } from './types';
-import { PilotDataStore } from './lib/supabase';
+import { PilotDataStore, migrateLegacyPlaintextPins } from './lib/supabase';
 import { Header } from './components/Header';
 import { TodaysPlanView } from './components/TodaysPlanView';
 import { ProgressView } from './components/ProgressView';
@@ -70,6 +70,10 @@ export default function App() {
       }
     }
   };
+
+  useEffect(() => {
+    migrateLegacyPlaintextPins();
+  }, []);
 
   useEffect(() => {
     refreshData();
@@ -154,7 +158,7 @@ export default function App() {
       />
 
       {/* Main Content */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-6 pb-28 sm:pb-12">
+      <main className="flex-1 max-w-4xl w-full mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-6 pb-32 sm:pb-16">
         {currentStudent ? (
           <>
             {/* Student Navigation Tabs */}
@@ -264,8 +268,8 @@ export default function App() {
         )}
       </main>
 
-      {/* Floating Action Button for Mobile: Quick Log */}
-      {currentStudent && (
+      {/* Floating Action Button for Mobile: Quick Log (Shown strictly on daily quest plan tab) */}
+      {currentStudent && activeTab === 'plan' && (
         <div className="fixed bottom-4 right-4 sm:hidden z-20">
           <button
             id="mobile-floating-log-btn"

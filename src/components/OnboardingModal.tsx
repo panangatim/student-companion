@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { Sparkles, User, BookOpen, Shield, Heart } from 'lucide-react';
 import { Student } from '../types';
-import { PilotDataStore } from '../lib/supabase';
+import { PilotDataStore, hashPin } from '../lib/supabase';
 
 interface OnboardingModalProps {
   isOpen: boolean;
@@ -64,17 +64,19 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
       setError('Please enter your name or nickname!');
       return;
     }
 
+    const hashedPin = pin.trim() ? await hashPin(pin.trim()) : '';
+
     const created = PilotDataStore.createStudent({
       name: name.trim(),
       username: name.trim().toLowerCase().replace(/\s+/g, ''),
-      pin: pin.trim(),
+      pin: hashedPin,
       class: grade.trim() || 'Student',
       school: school.trim(),
       avatar: selectedAvatar,
@@ -85,7 +87,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 py-6 sm:py-10 overflow-y-auto">
       <div className="bg-white rounded-3xl max-w-lg w-full p-4 sm:p-7 shadow-2xl border-4 border-amber-200 relative my-auto animate-star-pop max-h-[90dvh] overflow-y-auto">
         {/* Top Header */}
         <div className="text-center mb-4 sm:mb-6">

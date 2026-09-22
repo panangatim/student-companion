@@ -165,7 +165,7 @@ export const LogTaskModal: React.FC<LogTaskModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 py-6 sm:py-10 overflow-y-auto">
       <div className="bg-white rounded-3xl max-w-lg w-full p-4 sm:p-7 shadow-2xl border-4 border-amber-200 relative my-auto animate-star-pop max-h-[90dvh] overflow-y-auto">
         {/* Close Button */}
         <button
